@@ -3,46 +3,38 @@ if (file_exists(dirname(__FILE__) . '/../../../vendor/autoload.php')) {
     require_once(dirname(__FILE__) . '/../../../vendor/autoload.php');
 }
 App::uses('CakeEmail', 'Network/Email');
+App::uses('RegisteredMailLog', 'Postman.Model');
 
 class RegisteredMail extends CakeEmail
 {
     public $rawSubject = '';
+    public $RegisteredMailLog = null;
 
-    public function __construct($config = null) {
+    public function __construct($config = null)
+    {
         parent::__construct($config);
         $s = new Smarty();
+        $log = Configure::read('Postman.writeLog');
+        if ($log) {
+            $this->RegisteredMailLog = ClassRegistry::init('RegisteredMailLog');
+        }
         include_once SMARTY_PLUGINS_DIR . 'shared.mb_wordwrap.php';
     }
 
-    public function send($content = null) {
+    public function send($content = null)
+    {
         try {
             $contents = parent::send($content);
         } catch (SocketException $e) {
-            /* $data = array( */
-            /*     'from' => $this->from(), */
-            /*     'to' => $this->to(), */
-            /*     'cc' => $this->cc(), */
-            /*     'bcc' => $this->bcc(), */
-            /*     'headers' => $this->getHeaders(array('from', 'sender', 'replyTo', 'readReceipt', 'to', 'cc', 'subject')), */
-            /*     'subject' => $this->rawSubject, */
-            /*     'message' => $this->message(), */
-            /* ); */
+            $this->writeLog($e->getMessage());
             throw new SocketException($e->getMessage());
         }
-        /* $data = array( */
-        /*     'from' => $this->from(), */
-        /*     'to' => $this->to(), */
-        /*     'cc' => $this->cc(), */
-        /*     'bcc' => $this->bcc(), */
-        /*     'headers' => $this->getHeaders(array('from', 'sender', 'replyTo', 'readReceipt', 'to', 'cc', 'subject')), */
-        /*     'subject' => $this->rawSubject, */
-        /*     'message' => $this->message(), */
-        /* ); */
-
+        $this->writeLog(true, $contents);
         return $contents;
     }
 
-    public function subject($subject = null) {
+    public function subject($subject = null)
+    {
         $this->rawSubject = $subject;
         return parent::subject($subject);
     }
@@ -162,8 +154,55 @@ class RegisteredMail extends CakeEmail
         return $formatted;
     }
 
+    /**
+     * writeLog
+     *
+     */
+    public function writeLog($status = true, $contents = null)
+    {
+        if (empty($this->RegisteredMailLog)) {
+            return;
+        }
+
+        $data = array();
+        $headers = array(
+            'from', 'sender', 'replyTo', 'readReceipt', 'returnPath',
+            'to', 'cc', 'bcc', 'subject');
+        foreach ($headers as $header) {
+            $var = '_' . $header;
+            $data[Inflector::underscore($header)] = $this->{$var};
+        }
+        $data['subject_raw'] = $this->rawSubject;
+        $data['headers'] = $this->getHeaders($headers);
+        $data['message'] = $this->message();
+
+        if (!empty($contents['headers'])) {
+            $data['headers_sent'] = $contents['headers'];
+        }
+        if (!empty($contents['message'])) {
+            $data['message_sent'] = $contents['message'];
+        }
+
+        if ($status === true) {
+            $data['status'] = 'sent';
+        } else {
+            $data['status'] = 'error';
+            $data['error_message'] = $status;
+        }
+
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                $data[$key] = json_encode($value);
+            }
+        }
+
+        $this->RegisteredMailLog->create();
+        return $this->RegisteredMailLog->save($data);
+    }
+
     // @see http://www.cpa-lab.com/tech/0144
-    protected function strlen($string) {
+    protected function strlen($string)
+    {
         return strlen(bin2hex($string)) / 2;
     }
 
