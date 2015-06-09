@@ -37,7 +37,7 @@ class RegisteredMailTest extends CakeTestCase
     $this->email->subject('メールタイトル');
     $this->email->send($expect);
 
-    sleep(2);
+    sleep(5);
 
     $url = 'http://mailback.me/to/'.$hash.'.body';
     App::uses('HttpSocket', 'Network/Http');

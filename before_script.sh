@@ -7,14 +7,44 @@ if [ "$PHPCS" = '1' ]; then
 	exit 0
 fi
 
+#
+# Returns the latest reference (either a branch or tag) for any given
+# MAJOR.MINOR semantic versioning.
+#
+latest_ref() {
+	# Get version from master branch
+	MASTER=$(curl --silent https://raw.github.com/cakephp/cakephp/master/lib/Cake/VERSION.txt)
+	MASTER=$(echo "$MASTER" | tail -1 | grep -Ei "^$CAKE_VERSION\.")
+	if [ -n "$MASTER" ]; then
+		echo "master"
+		exit 0
+	fi
+
+	# Check if any branch matches CAKE_VERSION
+	BRANCH=$(curl --silent https://api.github.com/repos/cakephp/cakephp/git/refs/heads -u k1LoW:"$GITHUB_TOKEN")
+	BRANCH=$(echo "$BRANCH" | grep -Ei "\"refs/heads/$CAKE_VERSION\"" | grep -oEi "$CAKE_VERSION" | tail -1)
+	if [ -n "$BRANCH" ]; then
+		echo "$BRANCH"
+		exit 0
+	fi
+
+	# Get the latest tag matching CAKE_VERSION.*
+	TAG=$(curl --silent https://api.github.com/repos/cakephp/cakephp/git/refs/tags -u k1LoW:"$GITHUB_TOKEN")
+	TAG=$(echo "$TAG" | grep -Ei "\"refs/tags/$CAKE_VERSION\." | grep -oEi "$CAKE_VERSION\.[^\"]+" | tail -1)
+	if [ -n "$TAG" ]; then
+		echo "$TAG"
+		exit 0
+	fi
+}
+
 if [ "$DB" = "mysql" ]; then mysql -e 'CREATE DATABASE cakephp_test;'; fi
 if [ "$DB" = "pgsql" ]; then psql -c 'CREATE DATABASE cakephp_test;' -U postgres; fi
 
 REPO_PATH=$(pwd)
-SELF_PATH=$(cd "$(dirname "$0")"; pwd)
+SELF_PATH=/home/travis/build/k1LoW/travis
 
 # Clone CakePHP repository
-CAKE_REF="$CAKEPHP_VERSION"
+CAKE_REF=$(latest_ref)
 if [ -z "$CAKE_REF" ]; then
 	echo "Found no valid ref to match with version $CAKE_VERSION" >&2
 	exit 1
@@ -52,9 +82,11 @@ fi
 
 phpenv rehash
 
-set +H
+# set +H
 
 echo "CakePlugin::loadAll(array(array('bootstrap' => true, 'routes' => true, 'ignoreMissing' => true)));" >> Config/bootstrap.php
+
+echo "include (APP . 'vendor' . DS . 'autoload.php');" >> Config/bootstrap.php
 
 echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <phpunit>
