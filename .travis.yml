@@ -38,3 +38,5 @@ after_success:
 
 notifications:
   email: false
+
+secure: "TsoeAZwdK27t4D6dImCIqY7viI8hH2EInxHSUCnDt2arw+BFZxU/Cqoxrws6roEAMx67h8MKS6D/bak62TfKzNVYoP3jxU+nSA8sPEJaVZ+UY4iovWqYUK9rDwok84ePIRFiXDIYfa54dT6iwWFUJ3oMlzvGYBGIstse7grUNc4="
