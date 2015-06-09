@@ -12,9 +12,9 @@ env:
     - REQUIRE=""
 
   matrix:
-    - DB=mysql CAKE_VERSION=2.4
-    - DB=mysql CAKE_VERSION=2.5
-    - DB=mysql CAKE_VERSION=2.6
+    - DB=mysql CAKE_VERSION=2.4.10
+    - DB=mysql CAKE_VERSION=2.5.5
+    - DB=mysql CAKE_VERSION=2.6.7
 
 matrix:
   include:
@@ -28,7 +28,7 @@ matrix:
 before_script:
   - curl --silent https://api.github.com/repos/cakephp/cakephp/git/refs/tags
   - git clone -b master https://github.com/FriendsOfCake/travis.git --depth 1 ../travis
-  - ../travis/before_script.sh
+  - ./before_script.sh
 
 script:
   - ../travis/script.sh
