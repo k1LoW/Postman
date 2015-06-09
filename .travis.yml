@@ -8,7 +8,7 @@ php:
 
 env:
   global:
-    - PLUGIN_NAME=Example
+    - PLUGIN_NAME=Postman
     - REQUIRE=""
 
   matrix:
@@ -26,6 +26,7 @@ matrix:
         - PHPCS=1
 
 before_script:
+  - curl --silent https://api.github.com/repos/cakephp/cakephp/git/refs/tags
   - git clone -b master https://github.com/FriendsOfCake/travis.git --depth 1 ../travis
   - ../travis/before_script.sh
 
