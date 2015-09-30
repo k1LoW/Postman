@@ -11,7 +11,7 @@ class CensorshipModeTest extends CakeTestCase
 
     public function setUp() {
         Configure::write('Postman.censorship.mode', false);
-        $this->hash = $hash;
+        $this->hash = sha1(uniqid('',true));
         $this->email = new RegisteredMail();
         $this->email->config(array(
             'transport' => 'Smtp',
