@@ -11,13 +11,14 @@ class CensorshipModeTest extends CakeTestCase
 
     public function setUp() {
         Configure::write('Postman.censorship.mode', false);
+        $this->hash = $hash;
         $this->email = new RegisteredMail();
         $this->email->config(array(
             'transport' => 'Smtp',
             'from' => array('form@example.com' => 'from'),
             'to' => 'to+unknown-to@mailback.me',
-            'cc' => 'to+unknown-cc@mailback.me',
-            'bcc' => 'to+unknown-bcc@mailback.me',
+            'cc' => array('to+unknown-cc-' . $this->hash . '@mailback.me'),
+            'bcc' => array('to+unknown-bcc-' . $this->hash . '@mailback.me'),
             'host' => 'mail.mailback.me',
             'port' => 25,
             'timeout' => 30,
@@ -36,7 +37,7 @@ class CensorshipModeTest extends CakeTestCase
      *
      */
     public function test_Censorship(){
-        $hash = sha1(uniqid('',true));
+        $hash = $this->hash;
         $to = 'to+'.$hash.'@mailback.me';
 
         Configure::write('Postman.censorship.mode', true);
@@ -68,6 +69,17 @@ class CensorshipModeTest extends CakeTestCase
         $body = trim(str_replace(array("\r\n", "\n", ' '), '', $results->body));
         $message = trim(str_replace(array("\r\n", "\n", ' '), '', $message));
 
+        $this->assertIdentical($results->code, 200);
         $this->assertIdentical($body, $message);
+
+        // CC
+        $ccUrl = 'http://mailback.me/to/unknown-cc-'.$hash.'.body';
+        $results = $HttpSocket->get($ccUrl, array());
+        $this->assertIdentical($results->code, 404);
+        
+        // BCC
+        $bccUrl = 'http://mailback.me/to/unknown-bcc-'.$hash.'.body';
+        $results = $HttpSocket->get($bccUrl, array());
+        $this->assertIdentical($results->code, 404);
     }
 }
