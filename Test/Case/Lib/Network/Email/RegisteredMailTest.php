@@ -5,6 +5,10 @@ App::uses('HttpSocket', 'Network/Http');
 
 class RegisteredMailTest extends CakeTestCase
 {
+  public $fixtures = array(
+    'plugin.postman.registered_mail_log',
+  );
+
   public function setUp() {
     $this->email = new RegisteredMail();
     $this->email->config(array(
