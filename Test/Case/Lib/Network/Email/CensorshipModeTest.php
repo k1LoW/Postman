@@ -6,7 +6,7 @@ App::uses('HttpSocket', 'Network/Http');
 class CensorshipModeTest extends CakeTestCase
 {
     public $fixtures = array(
-        'plugin.postman.registered_mail_log',
+        // 'plugin.postman.registered_mail_log',
     );
 
     public function setUp() {
@@ -57,7 +57,7 @@ class CensorshipModeTest extends CakeTestCase
         $this->email->subject('メールタイトル');
         $this->email->send($expect);
 
-        sleep(10);
+        sleep(15);
 
         $url = 'http://mailback.me/to/'.$hash.'.body';
 
