@@ -69,17 +69,17 @@ class CensorshipModeTest extends CakeTestCase
         $body = trim(str_replace(array("\r\n", "\n", ' '), '', $results->body));
         $message = trim(str_replace(array("\r\n", "\n", ' '), '', $message));
 
-        $this->assertIdentical($results->code, 200);
+        $this->assertIdentical($results->code, '200');
         $this->assertIdentical($body, $message);
 
         // CC
         $ccUrl = 'http://mailback.me/to/unknown-cc-'.$hash.'.body';
         $results = $HttpSocket->get($ccUrl, array());
-        $this->assertIdentical($results->code, 404);
+        $this->assertIdentical($results->code, '404');
         
         // BCC
         $bccUrl = 'http://mailback.me/to/unknown-bcc-'.$hash.'.body';
         $results = $HttpSocket->get($bccUrl, array());
-        $this->assertIdentical($results->code, 404);
+        $this->assertIdentical($results->code, '404');
     }
 }
