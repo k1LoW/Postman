@@ -37,8 +37,8 @@ class CensorshipModeTest extends CakeTestCase
   public function test_Censorship(){
       $hash = sha1(uniqid('',true));
       $to = 'to+'.$hash.'@mailback.me';
-      
-      Configure::write('Postman.censorship.mode', true);      
+
+      Configure::write('Postman.censorship.mode', true);
       Configure::write('Postman.censorship.config', array(
           'transport' => 'Smtp',
           'from' => array('form@mailback.me' => 'from'),
@@ -52,8 +52,9 @@ class CensorshipModeTest extends CakeTestCase
       ));
 
       $message = 'Censored';
+      $expect = $message;
       $this->email->subject('メールタイトル');
-      $this->email->send($message);
+      $this->email->send($expect);
 
       sleep(5);
 
@@ -62,7 +63,7 @@ class CensorshipModeTest extends CakeTestCase
       App::uses('HttpSocket', 'Network/Http');
       $HttpSocket = new HttpSocket();
       $results = $HttpSocket->get($url, array());
-      
+
       $body = trim(str_replace(array("\r\n", "\n", ' '), '', $results->body));
       $message = trim(str_replace(array("\r\n", "\n", ' '), '', $message));
 
