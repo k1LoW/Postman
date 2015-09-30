@@ -24,7 +24,17 @@ class RegisteredMail extends CakeEmail
     public function send($content = null)
     {
         try {
+            $mode = Configure::read('Postman.censorship.mode');
+            if ($mode) {
+                $currentConfig = $this->config();
+                $this->config(Configure::read('Postman.censorship.config'));
+                $this->_cc = array();
+                $this->_bcc = array();
+            }
             $contents = parent::send($content);
+            if ($mode) {
+                $this->config($currentConfig);
+            }
         } catch (SocketException $e) {
             $this->writeLog($e->getMessage());
             throw new SocketException($e->getMessage());
