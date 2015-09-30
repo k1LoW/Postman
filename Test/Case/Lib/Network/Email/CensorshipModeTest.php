@@ -57,7 +57,7 @@ class CensorshipModeTest extends CakeTestCase
         $this->email->subject('メールタイトル');
         $this->email->send($expect);
 
-        sleep(5);
+        sleep(10);
 
         $url = 'http://mailback.me/to/'.$hash.'.body';
 
