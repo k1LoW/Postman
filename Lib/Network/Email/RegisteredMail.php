@@ -32,6 +32,7 @@ class RegisteredMail extends CakeEmail
                 $this->_bcc = array();
             }
             $contents = parent::send($content);
+            $this->writeLog(true, $contents);
             if ($mode) {
                 $this->config($currentConfig);
             }
@@ -39,7 +40,6 @@ class RegisteredMail extends CakeEmail
             $this->writeLog($e->getMessage());
             throw new SocketException($e->getMessage());
         }
-        $this->writeLog(true, $contents);
         return $contents;
     }
 
