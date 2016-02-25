@@ -6,7 +6,7 @@
 Configure::write('Postman.censorship.mode', true);
 Configure::write('Postman.censorship.config', array(
     'transport' => 'Smtp',
-    'from' => array('form@mailback.me' => 'from'),
+    'from' => array('from@mailback.me' => 'from'),
     'to' => 'to+postman@fusic.co.jp',
     'host' => 'mail.mailback.me',
     'port' => 25,
